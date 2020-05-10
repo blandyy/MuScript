@@ -1,0 +1,40 @@
+#!/usr/bin/expect
+
+set ssh_name [lindex $argv 0]
+if {$ssh_name == ""} {
+    puts "输入的服务器名字不能为空！"
+    exit
+}
+set fid [open "$env(HOME)/.ssh_info.txt" r]
+set flag 0 
+while {[gets $fid line] >= 0} {
+    set name [lindex $line 0]
+    set ip [lindex $line 1]
+    set port [lindex $line 2]
+    set user [lindex $line 3]
+    set passwd [lindex $line 4]
+    if {$name == $ssh_name} {
+        set flag 1
+        break
+    }
+}
+close $fid
+
+if {$flag == 0} {
+    puts "没有找到该服务器名字！"
+    exit
+} else {
+    puts "即将连接>>>>>>>>>>>"
+}
+
+spawn ssh -p $port $user@$ip
+expect "assword:"
+send "$passwd\n"
+expect {
+    "assword:" {
+        puts "密码错误，请检查配置文件！"
+        exit
+    }
+}
+expect $user
+interact
