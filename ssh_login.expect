@@ -1,6 +1,7 @@
 #!/usr/bin/expect
 
 set ssh_name [lindex $argv 0]
+set timeout 1    # 设置超时等待时间，减少登入后卡10s
 if {$ssh_name == ""} {
     puts "输入的服务器名字不能为空！"
     exit
@@ -28,8 +29,10 @@ if {$flag == 0} {
 }
 
 spawn ssh -p $port $user@$ip
-expect "assword:"
-send "$passwd\n"
+expect {
+    "yes/no" { send "yes\n"; exp_continue }
+    "assword:" { send "$passwd\n" }
+}
 expect {
     "assword:" {
         puts "密码错误，请检查配置文件！"
